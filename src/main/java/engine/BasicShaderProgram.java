@@ -95,6 +95,7 @@ public class BasicShaderProgram {
         if (fragmentShaderId != 0) {
             GL20.glDetachShader(programId, fragmentShaderId);
         }
+        //TODO: try deleting the shaders also since we shouldn't need them anymore.
         //Validate the program from debugging. Remove later.
         GL20.glValidateProgram(programId);
         if (GL20.glGetProgrami(programId, GL20.GL_VALIDATE_STATUS) == 0) {
