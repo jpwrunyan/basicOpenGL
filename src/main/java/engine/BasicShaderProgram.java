@@ -24,8 +24,8 @@ import java.util.Scanner;
 public class BasicShaderProgram {
 
     private final int programId;
-    private final int vertexShaderId;
-    private final int fragmentShaderId;
+    //private final int vertexShaderId;
+    //private final int fragmentShaderId;
     private final Map<String, Integer> uniforms = new HashMap<>();
 
     private static String loadResource(String fileName) throws Exception {
@@ -46,9 +46,31 @@ public class BasicShaderProgram {
         if (programId == 0) {
             throw new Exception("Could not create shader program!");
         }
-        vertexShaderId = createShader(loadResource("/basic.vs"), GL20.GL_VERTEX_SHADER);
-        fragmentShaderId = createShader(loadResource("/basic.fs"), GL20.GL_FRAGMENT_SHADER);
-        link();
+        //If we're deleting these right away and not re-using them... why keep them?
+        int vertexShaderId = createShader(loadResource("/basic.vs"), GL20.GL_VERTEX_SHADER);
+        int fragmentShaderId = createShader(loadResource("/basic.fs"), GL20.GL_FRAGMENT_SHADER);
+
+        //TODO: We may wish to defer linking and move this back to the link() method.
+        //link();
+        GL20.glLinkProgram(programId);
+        if (GL20.glGetProgrami(programId, GL20.GL_LINK_STATUS) == 0) {
+            throw new Exception("Error linking shader code: " + GL20.glGetProgramInfoLog(programId, 1024));
+        }
+        //Once the shader program has been linked, the compiled vertex and fragment shaders can be freed up.
+        if (vertexShaderId != 0) {
+            GL20.glDetachShader(programId, vertexShaderId);
+            GL20.glDeleteShader(vertexShaderId);
+        }
+        if (fragmentShaderId != 0) {
+            GL20.glDetachShader(programId, fragmentShaderId);
+            GL20.glDeleteShader(fragmentShaderId);
+        }
+        //TODO: try deleting the shaders also since we shouldn't need them anymore.
+        //Validate the program from debugging. Remove later.
+        GL20.glValidateProgram(programId);
+        if (GL20.glGetProgrami(programId, GL20.GL_VALIDATE_STATUS) == 0) {
+            throw new Exception("Warning validating shader code: " + GL20.glGetProgramInfoLog(programId, 1024));
+        }
         System.out.println("shader program created");
     }
 
@@ -83,7 +105,9 @@ public class BasicShaderProgram {
      *
      * @throws Exception
      */
+    @Deprecated
     public void link() throws Exception {
+        /*
         GL20.glLinkProgram(programId);
         if (GL20.glGetProgrami(programId, GL20.GL_LINK_STATUS) == 0) {
             throw new Exception("Error linking shader code: " + GL20.glGetProgramInfoLog(programId, 1024));
@@ -91,9 +115,11 @@ public class BasicShaderProgram {
         //Once the shader program has been linked, the compiled vertex and fragment shaders can be freed up.
         if (vertexShaderId != 0) {
             GL20.glDetachShader(programId, vertexShaderId);
+            GL20.glDeleteShader(vertexShaderId);
         }
         if (fragmentShaderId != 0) {
             GL20.glDetachShader(programId, fragmentShaderId);
+            GL20.glDeleteShader(fragmentShaderId);
         }
         //TODO: try deleting the shaders also since we shouldn't need them anymore.
         //Validate the program from debugging. Remove later.
@@ -101,6 +127,7 @@ public class BasicShaderProgram {
         if (GL20.glGetProgrami(programId, GL20.GL_VALIDATE_STATUS) == 0) {
             throw new Exception("Warning validating shader code: " + GL20.glGetProgramInfoLog(programId, 1024));
         }
+        */
     }
 
     /**

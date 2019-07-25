@@ -1,5 +1,8 @@
 package tutorial;
 
+/**
+ * ie Mesh
+ */
 public class RawModel {
 
     public final int vaoId;

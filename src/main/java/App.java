@@ -3,24 +3,13 @@ import engine.MainWindow;
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.system.MemoryUtil;
-import tutorial.ModelLoader;
+import org.lwjgl.opengl.GL30;
+import tutorial.LoaderUtil;
 import tutorial.RawModel;
 import tutorial.Renderer;
+import tutorial.Texture;
 
-import java.nio.FloatBuffer;
-
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.glDrawArrays;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class App implements Runnable {
     public static void main(String[] args) {
@@ -51,8 +40,9 @@ public class App implements Runnable {
         boolean running = true;
 
 
-        ModelLoader loader = new ModelLoader();
+        LoaderUtil loader = new LoaderUtil();
         Renderer renderer = new Renderer();
+
 
         float[] testVertices = new float[] {
             -0.5f, 0.5f, 0,
@@ -63,7 +53,20 @@ public class App implements Runnable {
             -0.5f, 0.5f, 0
         };
 
+        //TODO: need to add the indices. Duh.
+        //do this in tutorial 3
+        //https://www.youtube.com/watch?v=z2yFlvkBbmk
+
+
+        float[] textureCoords = new float[] {
+            0, 1, 3,
+            3, 1, 2
+        };
+
         RawModel model = loader.loadToVao(testVertices);
+        //Why not return a texture class???
+        Texture texture = new Texture(loader.loadTexture("quad_texture.png"));
+
         float tempVar = 0.20f;
         try {
             //Create shader program(s).
@@ -80,19 +83,25 @@ public class App implements Runnable {
                 //To be moved to the renderer? Needs to be called every update.
                 GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
+                //Set the shader program to use.
                 shaderProgram.bind();
-                //Do rendering.
-                // Bind to the VAO
-                glBindVertexArray(model.vaoId);
-                glEnableVertexAttribArray(0);
 
-                // Draw the vertices
-                glDrawArrays(GL_TRIANGLES, 0, model.vertexCount);
+                //Do rendering.
+
+                //Bind the VAO.
+                //The shader program will read these in on its own.
+                GL30.glBindVertexArray(model.vaoId);
+                GL30.glEnableVertexAttribArray(0);
+
+                //Draw the vertices.
+                //This will trigger the shader program main() for each shader.
+                GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.vertexCount);
 
                 // Restore state
-                glDisableVertexAttribArray(0);
-                glBindVertexArray(0);
+                GL30.glDisableVertexAttribArray(0);
+                GL30.glBindVertexArray(0);
 
+                //Release the program.
                 shaderProgram.unbind();
 
 
@@ -109,6 +118,8 @@ public class App implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        loader.cleanUp();
 
         Callbacks.glfwFreeCallbacks(MainWindow.getInstance().id);
         GLFW.glfwDestroyWindow(MainWindow.getInstance().id);
