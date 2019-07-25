@@ -24,7 +24,7 @@ public class LoaderUtil {
     private List<Integer> vboList = new ArrayList<>();
     private List<Integer> textureList = new ArrayList<>();
 
-    public RawModel loadToVao(float[] vertices) {
+    public RawModel loadToVao(float[] vertices, int[] indices) {
         //-------------------
 
         int vaoId = GL30.glGenVertexArrays();
@@ -39,22 +39,30 @@ public class LoaderUtil {
         vboList.add(vboId);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, verticesBuffer, GL15.GL_STATIC_DRAW);
-
-        // Define structure of the data
+        //Define structure of the data.
         GL20.glVertexAttribPointer(0, 3, GL20.GL_FLOAT, false, 0, 0);
-
         // Unbind the VBO
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        MemoryUtil.memFree(verticesBuffer);
 
-        if (verticesBuffer != null) {
-            MemoryUtil.memFree(verticesBuffer);
-        }
+        //-------------------
+        IntBuffer indicesBuffer = MemoryUtil.memAllocInt(indices.length);
+        indicesBuffer.put(indices).flip();
+        //Create the indices VBO and bind to it.
+        vboId = GL15.glGenBuffers();
+        vboList.add(vboId);
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
+        GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL30.GL_STATIC_DRAW);
+        MemoryUtil.memFree(indicesBuffer);
+        // Unbind the VBO
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        MemoryUtil.memFree(indicesBuffer);
         //-------------------
 
         //Unbind the VAO.
         GL30.glBindVertexArray(0);
 
-        return new RawModel(vaoId, vertices.length / 3);
+        return new RawModel(vaoId, indices.length);
     }
 
     public int loadTexture(String fileName) {
@@ -70,6 +78,7 @@ public class LoaderUtil {
             URL url = LoaderUtil.class.getResource(fileName);
             File file = Paths.get(url.toURI()).toFile();
             String filePath = file.getAbsolutePath();
+            System.out.println("filepath: " + filePath);
             byteBuffer = STBImage.stbi_load(filePath, w, h, channels, 4);
             if (byteBuffer == null) {
                 throw new Exception("File [" + filePath + "] not loaded: " + STBImage.stbi_failure_reason());

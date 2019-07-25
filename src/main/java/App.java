@@ -48,9 +48,11 @@ public class App implements Runnable {
             -0.5f, 0.5f, 0,
             -0.5f, -0.5f, 0,
             0.5f, -0.5f, 0,
-            0.5f, -0.5f, 0,
-            0.5f, 0.5f, 0,
-            -0.5f, 0.5f, 0
+            0.5f, 0.5f, 0
+        };
+
+        int[] testIndices = new int[] {
+            0, 1, 3, 3, 1, 2
         };
 
         //TODO: need to add the indices. Duh.
@@ -63,9 +65,10 @@ public class App implements Runnable {
             3, 1, 2
         };
 
-        RawModel model = loader.loadToVao(testVertices);
+        RawModel model = loader.loadToVao(testVertices, testIndices);
         //Why not return a texture class???
-        Texture texture = new Texture(loader.loadTexture("quad_texture.png"));
+        int textureId = loader.loadTexture("/grassblock.png");
+        Texture texture = new Texture(textureId);
 
         float tempVar = 0.20f;
         try {
@@ -95,8 +98,9 @@ public class App implements Runnable {
 
                 //Draw the vertices.
                 //This will trigger the shader program main() for each shader.
-                GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.vertexCount);
-
+                //Draw arrays is for raw vertices with no indices.
+                //GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.vertexCount);
+                GL11.glDrawElements(GL11.GL_TRIANGLES, model.vertexCount, GL11.GL_UNSIGNED_INT, 0);
                 // Restore state
                 GL30.glDisableVertexAttribArray(0);
                 GL30.glBindVertexArray(0);
