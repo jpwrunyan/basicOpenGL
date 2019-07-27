@@ -24,7 +24,7 @@ public class LoaderUtil {
     private List<Integer> vboList = new ArrayList<>();
     private List<Integer> textureList = new ArrayList<>();
 
-    public RawModel loadToVao(float[] vertices, int[] indices) {
+    public RawModel loadToVao(float[] vertices, float[] textureCoords, int[] indices) {
         //-------------------
 
         int vaoId = GL30.glGenVertexArrays();
@@ -32,24 +32,37 @@ public class LoaderUtil {
         GL30.glBindVertexArray(vaoId);
 
         //-------------------
-        FloatBuffer verticesBuffer = MemoryUtil.memAllocFloat(vertices.length).put(vertices);
-        verticesBuffer.flip();
-        // Create the VBO and bind to it.
-        int vboId = GL15.glGenBuffers();
-        vboList.add(vboId);
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, verticesBuffer, GL15.GL_STATIC_DRAW);
-        //Define structure of the data.
-        GL20.glVertexAttribPointer(0, 3, GL20.GL_FLOAT, false, 0, 0);
-        // Unbind the VBO
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-        MemoryUtil.memFree(verticesBuffer);
+        vboList.add(
+            createArrayBufferVBO(0, 3, vertices)
+        );
 
         //-------------------
+        /*
+        FloatBuffer textureCoordsBuffer = MemoryUtil.memAllocFloat(textureCoords.length).put(textureCoords);
+        textureCoordsBuffer.flip();
+        // Create the VBO and bind to it.
+        vboId = GL15.glGenBuffers();
+        vboList.add(vboId);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, textureCoordsBuffer, GL15.GL_STATIC_DRAW);
+        //Define structure of the data.
+        GL20.glVertexAttribPointer(0, 2, GL20.GL_FLOAT, false, 0, 0);
+        // Unbind the VBO
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        MemoryUtil.memFree(textureCoordsBuffer);
+        */
+
+        vboList.add(
+            createArrayBufferVBO(1, 2, textureCoords)
+        );
+
+
+        //-------------------
+        //No special method yet for element array
         IntBuffer indicesBuffer = MemoryUtil.memAllocInt(indices.length);
         indicesBuffer.put(indices).flip();
         //Create the indices VBO and bind to it.
-        vboId = GL15.glGenBuffers();
+        int vboId = GL15.glGenBuffers();
         vboList.add(vboId);
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
         GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL30.GL_STATIC_DRAW);
@@ -65,9 +78,23 @@ public class LoaderUtil {
         return new RawModel(vaoId, indices.length);
     }
 
-    public int loadTexture(String fileName) {
-        ByteBuffer byteBuffer;
+    private int createArrayBufferVBO(int attributeIndex, int attributeSize, float[] attributeValues) {
+        FloatBuffer attributeValuesBuffer = MemoryUtil.memAllocFloat(attributeValues.length).put(attributeValues);
+        attributeValuesBuffer.flip();
+        // Create the VBO and bind to it.
+        int vboId = GL15.glGenBuffers();
+        vboList.add(vboId);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, attributeValuesBuffer, GL15.GL_STATIC_DRAW);
+        //Define structure of the data.
+        GL20.glVertexAttribPointer(attributeIndex, attributeSize, GL20.GL_FLOAT, false, 0, 0);
+        // Unbind the VBO
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        MemoryUtil.memFree(attributeValuesBuffer);
+        return vboId;
+    }
 
+    public RawTexture loadTexture(String fileName) {
         //Load texture file.
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
@@ -79,7 +106,7 @@ public class LoaderUtil {
             File file = Paths.get(url.toURI()).toFile();
             String filePath = file.getAbsolutePath();
             System.out.println("filepath: " + filePath);
-            byteBuffer = STBImage.stbi_load(filePath, w, h, channels, 4);
+            ByteBuffer byteBuffer = STBImage.stbi_load(filePath, w, h, channels, 4);
             if (byteBuffer == null) {
                 throw new Exception("File [" + filePath + "] not loaded: " + STBImage.stbi_failure_reason());
             }
@@ -111,15 +138,19 @@ public class LoaderUtil {
             );
             //Generate mipmaps (as opposed to setting filtering parameters).
             GL30.glGenerateMipmap(GL30.GL_TEXTURE_2D);
+
+            //Free the memory of the raw image data.
+            STBImage.stbi_image_free(byteBuffer);
+
             textureList.add(textureId);
-            return textureId;
+            return new RawTexture(textureId);
         } catch (URISyntaxException e) {
             System.out.println("bad uri");
             e.printStackTrace();
-            return -1;
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
-            return -1;
+            return null;
         }
     }
 

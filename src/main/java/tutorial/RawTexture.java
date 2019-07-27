@@ -1,10 +1,10 @@
 package tutorial;
 
-public class Texture {
+public class RawTexture {
 
     public final int id;
 
-    public Texture(int id) {
+    public RawTexture(int id) {
         this.id = id;
     }
 
