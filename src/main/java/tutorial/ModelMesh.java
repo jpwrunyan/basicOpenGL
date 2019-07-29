@@ -1,14 +1,14 @@
 package tutorial;
 
 /**
- * ie Mesh
+ * ie ModelMesh
  */
-public class RawModel {
+public class ModelMesh {
 
     public final int vaoId;
     public final int vertexCount;
 
-    public RawModel(int vaoId, int vertexCount) {
+    public ModelMesh(int vaoId, int vertexCount) {
         this.vaoId = vaoId;
         this.vertexCount = vertexCount;
 

@@ -1,22 +1,23 @@
-package engine;
+package display;
 
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.IntBuffer;
 
+import static org.lwjgl.glfw.GLFW.glfwSetFramebufferSizeCallback;
+
 public class MainWindow {
 
     private static MainWindow instance;
 
-    private static final int width = 1280;
-    private static final int height = 720;
+    public int width = 1280;
+    public int height = 720;
+    public boolean resized = false;
 
     public final long id;
 
@@ -28,10 +29,6 @@ public class MainWindow {
     }
 
     private MainWindow() {
-
-
-
-
         //This is optional, current window hints are already default.
         GLFW.glfwDefaultWindowHints();
         //The window will stay hidden after creation.
@@ -50,12 +47,21 @@ public class MainWindow {
             throw new RuntimeException("Failed to create the GLFW window.");
         }
 
+        // Setup resize callback
+        GLFW.glfwSetFramebufferSizeCallback(id, (windowId, width, height) -> {
+            this.width = width;
+            this.height = height;
+            resized = true;
+        });
+
         //Default callback:
         // Setup a key callback. It will be called every time a key is pressed, repeated or released.
         GLFW.glfwSetKeyCallback(id, (windowId, key, scancode, action, mods) -> {
             if ( key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_RELEASE )
                 GLFW.glfwSetWindowShouldClose(windowId, true); // We will detect this in the rendering loop
         });
+
+
 
         //A bit overkill...
         try (MemoryStack stack = MemoryStack.stackPush()){

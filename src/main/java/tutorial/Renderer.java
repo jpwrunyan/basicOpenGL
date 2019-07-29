@@ -1,7 +1,6 @@
 package tutorial;
 
-import engine.BasicShaderProgram;
-import engine.MainWindow;
+import display.BasicShaderProgram;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
@@ -16,7 +15,7 @@ public class Renderer {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
     }
 
-    public void render(RawModel model) {
+    public void render(ModelMesh model) {
         //shaderProgrambind();
 
         GL30.glBindVertexArray(model.vaoId);

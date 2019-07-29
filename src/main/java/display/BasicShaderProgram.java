@@ -1,14 +1,8 @@
-package engine;
+package display;
 
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.system.MemoryStack;
 
 import java.io.InputStream;
-import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;

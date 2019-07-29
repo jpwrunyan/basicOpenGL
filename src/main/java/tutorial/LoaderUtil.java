@@ -24,7 +24,7 @@ public class LoaderUtil {
     private List<Integer> vboList = new ArrayList<>();
     private List<Integer> textureList = new ArrayList<>();
 
-    public RawModel loadToVao(float[] vertices, float[] textureCoords, int[] indices) {
+    public ModelMesh loadToVao(float[] vertices, float[] textureCoords, int[] indices) {
         //-------------------
 
         int vaoId = GL30.glGenVertexArrays();
@@ -75,7 +75,7 @@ public class LoaderUtil {
         //Unbind the VAO.
         GL30.glBindVertexArray(0);
 
-        return new RawModel(vaoId, indices.length);
+        return new ModelMesh(vaoId, indices.length);
     }
 
     private int createArrayBufferVBO(int attributeIndex, int attributeSize, float[] attributeValues) {
@@ -94,7 +94,7 @@ public class LoaderUtil {
         return vboId;
     }
 
-    public RawTexture loadTexture(String fileName) {
+    public ModelTexture loadTexture(String fileName) {
         //Load texture file.
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
@@ -143,7 +143,7 @@ public class LoaderUtil {
             STBImage.stbi_image_free(byteBuffer);
 
             textureList.add(textureId);
-            return new RawTexture(textureId);
+            return new ModelTexture(textureId);
         } catch (URISyntaxException e) {
             System.out.println("bad uri");
             e.printStackTrace();
