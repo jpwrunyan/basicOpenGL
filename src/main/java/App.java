@@ -43,10 +43,10 @@ public class App implements Runnable {
         LoaderUtil loader = new LoaderUtil();
 
         float[] testVertices = new float[] {
-            -0.5f, -0.5f, 0.5f,
-            0.5f, -0.5f, 0.5f,
-            -0.5f, 0.5f, 0.5f,
-            0.5f, 0.5f, 0.5f
+            -0.5f, -0.5f, 0.0f,
+            0.5f, -0.5f, 0.0f,
+            -0.5f, 0.5f, 0.0f,
+            0.5f, 0.5f, 0.0f
         };
 
         int[] testIndices = new int[] {
@@ -129,8 +129,8 @@ public class App implements Runnable {
                 Vector3f displayObjectRotation = displayObject.getRotation();
 
                 // Update rotation angle
-                float rotation = displayObject.getRotation().z + 1.5f;
-                displayObject.setRotation(0, 0, rotation);
+                float rotation = displayObject.getRotation().y + 1.5f;
+                displayObject.setRotation(0, rotation, 0);
 
                 //To be moved to the renderer? Needs to be called every update.
                 GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); // clear the framebuffer
