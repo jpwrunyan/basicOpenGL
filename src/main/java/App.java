@@ -30,6 +30,9 @@ public class App implements Runnable {
     private static final float Z_NEAR = 0.01f;
     private static final float Z_FAR = 1000f;
 
+    float cameraX = 0f;
+    float cameraY = 0f;
+    float cameraZ = 0f;
     public void run() {
         //Sets up an error callback.
         GLFWErrorCallback.createPrint(System.err).set();
@@ -156,6 +159,11 @@ public class App implements Runnable {
                 //----------------------------------------
                 // Get the "world matrix"
                 modelViewMatrix = new Matrix4f().identity();
+
+                //Before applying the object, apply the camera translation.
+                modelViewMatrix.translate(cameraX, cameraY, cameraZ);
+                cameraZ += 0.001;
+
                 modelViewMatrix.translate(displayObject.getPosition())
                         //.rotateXYZ() //use for radians.
                         .rotateX((float) Math.toRadians(-displayObjectRotation.x))
